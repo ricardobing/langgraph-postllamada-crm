@@ -4,8 +4,8 @@ instrucciones: >-
   Clasifica cómo fue esta llamada de un agente de voz inmobiliario con un lead, según la transcripción.
   Si el lead pide que no le contacten, eso manda sobre cualquier otra cosa.
 criterios:
-  no_contactar: El lead pide explícitamente que no le vuelvan a llamar o contactar, que le den de baja o que borren sus datos, aunque la conversación siga después.
-  persona_equivocada: Quien contesta no es el lead y no se sabe cuándo localizarlo (número equivocado).
+  no_contactar: El propio lead (no un tercero que contesta por error) pide explícitamente que no le vuelvan a llamar o contactar, que le den de baja o que borren sus datos, aunque la conversación siga después.
+  persona_equivocada: Quien contesta no es el lead y no se sabe cuándo localizarlo (número equivocado), aunque pida que no llamen más a ese número.
   descartado: El lead ya compró, ya alquiló o ya no busca vivienda, sin pedir que no le llamen.
   callback: El lead pide expresamente que se le llame en otro momento.
   documentacion_enviada: El agente envió durante la llamada la documentación y el lead aceptó recibirla por WhatsApp.

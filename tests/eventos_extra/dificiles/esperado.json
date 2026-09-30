@@ -1,0 +1,16 @@
+{
+  "d01-baja-al-final-tras-visita": "no_contactar",
+  "d02-baja-indirecta": "no_contactar",
+  "d03-descartado-sin-baja": "descartado",
+  "d04-tercero-sabe-cuando": "callback",
+  "d05-equivocado-pide-no-llamar": "persona_equivocada",
+  "d06-luego-sin-hora": "callback",
+  "d07-reunion-sin-pedir-llamada": "otro",
+  "d08-doc-cualquier-canal": "documentacion_enviada",
+  "d09-callback-domingo": "callback",
+  "d10-numero-de-hermano": "persona_equivocada",
+  "d11-compro-pero-hermano-busca": "descartado",
+  "d12-ironia": "descartado",
+  "d13-cortada-mitad-presupuesto": "cortada",
+  "d14-amd-uncertain-media-hora": "callback"
+}
