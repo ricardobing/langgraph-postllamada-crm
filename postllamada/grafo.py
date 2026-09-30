@@ -15,7 +15,6 @@
 """
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
@@ -144,7 +143,3 @@ def construir_grafo(cfg: Config, estado: Estado, clasificador: Clasificador | No
         g.add_edge(nodo, "registrar_y_emitir")
     g.add_edge("registrar_y_emitir", END)
     return g.compile()
-
-
-def fecha_evento(evento: dict) -> datetime:
-    return datetime.fromisoformat(evento["occurred_at"])

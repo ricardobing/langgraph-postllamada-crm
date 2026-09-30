@@ -27,6 +27,9 @@ que es `callback` (`persona_equivocada` es «no se sabe cuándo localizarlo»).
 | Solo d04 × 20 | 18/20 | 12/20 |
 | **Total** | **43/50 (86 %)** | **28/45 (62 %)** |
 
+Las filas «Set difícil × 5», «Solo d04 × 20» y la de callbacks × 20 no tienen informe commiteado en esta carpeta
+(el script reescribe los informes por nombre); las demás, sí.
+
 Los dos fallan hacia `otro`, que manda la llamada a revisión humana: es una falla segura, pero se pierde el callback.
 
 ## Decisión

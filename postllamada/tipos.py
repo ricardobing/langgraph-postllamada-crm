@@ -4,12 +4,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-Etiqueta = Literal[
-    "visita_reservada", "documentacion_enviada", "callback", "sin_respuesta", "ocupado", "buzon", "cortada",
-    "visita_sin_confirmar", "persona_equivocada", "no_contactar", "rechazada", "documentacion_pendiente",
-    "descartado", "otro", "no_aplica",
-]
-
 # Estado de cola que lleva cerrar_llamada, fijado por la etiqueta (casos.md). No se decide: se consulta.
 ESTADO_COLA: dict[str, str] = {
     "visita_reservada": "successful",

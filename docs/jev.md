@@ -53,12 +53,13 @@ caso. El gasto es el que informa el proveedor. Informes en [`evaluaciones/`](eva
 
 | Configuración | Acierto | Llamadas al modelo | Latencia: solo Jev / con modelo | Costo total |
 |---|---|---|---|---|
-| `gpt-5.6-luna` solo (el principal) | 70/70 | 70 | — / 3,1 s | USD 0,0187 |
-| `gpt-5.6-luna` + Jev rápido | 69/70² | **41** (−41 %) | **0,4 s** / 3,7 s | USD 0,0142 (−24 %) |
+| `gpt-5.6-luna` solo (el principal)³ | 68/70² | 70 | — / 3,2 s | USD 0,0184 |
+| `gpt-5.6-luna` + Jev rápido | 69/70² | **41** (−41 %) | **0,4 s** / 3,7 s | USD 0,0142 (−23 %) |
 | `gpt-6-luna` + Jev rápido | 67/70² | **40** (−43 %) | **0,5 s** / 3,6 s | USD 0,0072 |
 
 ¹ Una hora de callback mal en 5 repeticiones; la etiqueta, bien. ² Todos los fallos son del d04 (un tercero dice
-cuándo llamar), que decide el modelo y no Jev: es un `callback` y necesita la hora.
+cuándo llamar), que decide el modelo y no Jev: es un `callback` y necesita la hora. ³ Del informe con Jev en
+`segunda_opinion`, donde Jev no se consultó ni una vez: equivale al modelo solo.
 
 - **Todas las decisiones que tomó Jev solo fueron correctas**, incluidas las trampas del set difícil: bajas dichas al
   final o de forma indirecta, «ya compré» con la puerta abierta, ironía y un equivocado que pide no llamar.
@@ -71,7 +72,7 @@ cuándo llamar), que decide el modelo y no Jev: es un `callback` y necesita la h
 | Opción | Cuándo |
 |---|---|
 | **Sin Jev** (por defecto) | Lo que pide el enunciado. Una sola dependencia externa y una sola clave. Es lo que evalúan |
-| `rapido` | Cuando importa la latencia: un tercio de los eventos se resuelve en 0,5 s en vez de ~3,5 s, sin perder acierto. Ahorra costo con el modelo principal (−12 % a −24 % con `gpt-5.6-luna`) y queda neutro con uno barato (con `gpt-6-luna`, lo que cuesta Jev es lo que se ahorra). Suma ~0,5 s a los eventos que igual van al modelo |
+| `rapido` | Cuando importa la latencia: un tercio de los eventos se resuelve en 0,5 s en vez de ~3,5 s, sin perder acierto. Ahorra costo con el modelo principal (−12 % a −23 % con `gpt-5.6-luna`) y queda neutro con uno barato (con `gpt-6-luna`, lo que cuesta Jev es lo que se ahorra). Suma ~0,5 s a los eventos que igual van al modelo |
 | `segunda_opinion` | Como red de seguridad ante una caída del proveedor principal. En la práctica ya la cubre el modelo de respaldo, y los modelos nunca dudaron, así que **hoy no aporta**. La dejo porque no cuesta nada cuando no actúa |
 
 Resumen honesto: **Jev aporta velocidad, no acierto.** En este proceso, que corre después de la llamada, 3 segundos

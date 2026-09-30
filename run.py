@@ -3,8 +3,10 @@
     python run.py eventos/01-call-ended-nuria.json
 
 Código de salida: 0 si el evento se procesó (aunque se haya rechazado o haya ido a revisión humana), distinto de 0 si
-no se pudo procesar (fichero ilegible, evento que no cumple el esquema, error inesperado). Un fallo en un evento no
-deja estado a medias: la escritura en SQLite es transaccional (R8).
+no se pudo procesar (fichero ilegible, evento que no cumple el esquema, error inesperado). Un fallo antes de persistir
+no deja nada a medias: todo lo del evento se guarda en SQLite en una sola transacción, al final (R8). Las líneas de
+salida se escriben después del commit; si el proceso muere justo entre las dos cosas, esas líneas se pierden (ver
+README, «Qué dejé fuera»).
 """
 from __future__ import annotations
 

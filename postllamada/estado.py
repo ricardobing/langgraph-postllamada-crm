@@ -7,7 +7,8 @@ Cada evento es un proceso nuevo, así que todo lo que haya que recordar vive aqu
 - `leads`: bajas (N2) y rechazo de WhatsApp (N1).
 - `recordatorios`: los que programamos, con el reminder_id que generamos, para poder cancelarlos (R7).
 
-Todo lo que produce un evento se guarda en UNA transacción: o queda todo o no queda nada.
+Todo lo que produce un evento se guarda en UNA transacción: o queda todo o no queda nada en SQLite. Los `.jsonl` de
+salida se escriben después, fuera de esta transacción (sin outbox: ver README).
 """
 from __future__ import annotations
 
@@ -93,9 +94,6 @@ class Estado:
             whatsapp_rechazado=bool(lead and lead["whatsapp_rechazado"]),
             recordatorios_pendientes=[Recordatorio(f["reminder_id"], f["canal"], f["cuando"]) for f in pendientes],
         )
-
-    def orden_existe(self, idempotency_key: str) -> bool:
-        return self.con.execute("SELECT 1 FROM ordenes WHERE idempotency_key = ?", (idempotency_key,)).fetchone() is not None
 
     # --- Escritura (después de decidir), en una sola transacción ---------------------------------
 

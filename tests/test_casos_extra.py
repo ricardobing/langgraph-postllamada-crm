@@ -104,6 +104,42 @@ def test_callback_dentro_de_ventana_sin_aviso(entorno):
     assert cuerpo(e, d, "programar_llamada")["no_antes_de"] == "2026-09-17T12:30:00+02:00"
 
 
+@pytest.mark.parametrize("occurred_at, fecha, hora, ambigua, esperado, aviso", [
+    # "Llámame a las seis" sin día, a las 12:00 → hoy a las 18:00 (no la separación general de 2 h).
+    ("2026-09-15T12:00:00+02:00", None, "06:00", True, "2026-09-15T18:00:00+02:00", False),
+    # "A las cinco" a las 17:05: las 05:00 y las 17:00 ya pasaron → mañana a las 17:00.
+    ("2026-09-15T17:05:00+02:00", None, "05:00", True, "2026-09-16T17:00:00+02:00", False),
+    # "A las diez de la noche" sin día → fuera de la ventana: primera franja + aviso (caso 12).
+    ("2026-09-15T17:05:00+02:00", None, "22:00", False, "2026-09-16T10:00:00+02:00", True),
+    # El modelo pone "hoy" y una hora ambigua ya pasada: "a las diez" a las 12:00 es 22:00 → primera franja + aviso.
+    ("2026-09-15T12:00:00+02:00", "2026-09-15", "10:00", True, "2026-09-16T10:00:00+02:00", True),
+    # "Hoy a las 11:00" dicho a las 17:05: ya pasó → mañana a la misma hora, no ahora mismo.
+    ("2026-09-15T17:05:00+02:00", "2026-09-15", "11:00", False, "2026-09-16T11:00:00+02:00", False),
+    # Viernes 19:00, "a las seis" sin día: hoy ya pasaron las dos lecturas → sábado 18:00, pero el sábado cierra a
+    # las 14:00 → primera franja válida: lunes 10:00 + aviso.
+    ("2026-09-18T19:00:00+02:00", None, "06:00", True, "2026-09-21T10:00:00+02:00", True),
+    # De madrugada (05:00), "a las siete" sin día: las 07:00 caen fuera de la ventana y nadie pide la madrugada → 19:00.
+    ("2026-09-15T05:00:00+02:00", None, "07:00", True, "2026-09-15T19:00:00+02:00", False),
+])
+def test_callback_con_hora_sin_dia_o_de_hoy(entorno, occurred_at, fecha, hora, ambigua, esperado, aviso):
+    ev = variante("09-call-ended-javier.json", occurred_at=occurred_at)
+    e = entorno({ev["idempotency_key"]: llm("callback", callback_fecha=fecha, callback_hora=hora, callback_hora_ambigua=ambigua)})
+    d = e.procesar(ev)
+    assert cuerpo(e, d, "programar_llamada")["no_antes_de"] == esperado
+    assert ops(e, d) == ["cerrar_llamada", "programar_llamada"] + (["enviar_plantilla_whatsapp"] if aviso else [])
+    if aviso:
+        assert cuerpo(e, d, "enviar_plantilla_whatsapp")["plantilla"] == "aviso_cambio_hora"
+
+
+def test_callback_hoy_sin_hora_aplica_la_separacion_general(entorno):
+    """"Llámame hoy más tarde": sin hora concreta, no la apertura de hoy (que ya pasó) ni un aviso de cambio de hora."""
+    ev = variante("09-call-ended-javier.json")  # 17:05
+    e = entorno({ev["idempotency_key"]: llm("callback", callback_fecha="2026-09-15")})
+    d = e.procesar(ev)
+    assert ops(e, d) == ["cerrar_llamada", "programar_llamada"]
+    assert cuerpo(e, d, "programar_llamada")["no_antes_de"] == "2026-09-15T19:05:00+02:00"
+
+
 def test_callback_sin_hora_concreta_aplica_la_separacion_general(entorno):
     ev = variante("09-call-ended-javier.json")  # 17:05
     e = entorno({ev["idempotency_key"]: llm("callback")})

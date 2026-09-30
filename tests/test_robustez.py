@@ -84,6 +84,14 @@ def test_run_procesa_y_devuelve_0(tmp_path):
     assert [json.loads(l) for l in lineas] == [json.loads(l) for l in ejemplo]
 
 
+def test_run_reproduce_el_ejemplo_resuelto_byte_a_byte(tmp_path):
+    """Orden de campos, separadores, UTF-8 sin escapar y LF: el formato exacto, no solo el contenido."""
+    r = correr([str(RAIZ / "eventos" / "02-call-ended-tomas.json")], tmp_path)
+    assert r.returncode == 0, r.stderr
+    for nombre in ("decisiones.jsonl", "ordenes.jsonl"):
+        assert (tmp_path / "salida" / nombre).read_bytes() == (RAIZ / "ejemplo-resuelto" / "salida" / nombre).read_bytes(), nombre
+
+
 def test_run_json_roto_devuelve_distinto_de_0(tmp_path):
     roto = tmp_path / "roto.json"
     roto.write_text("{ esto no es json", encoding="utf-8")

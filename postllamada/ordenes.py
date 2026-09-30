@@ -263,26 +263,43 @@ class _Ayudante:
 
 
 def resolver_hora_callback(datos, t: datetime, cfg: Config) -> datetime | None:
-    """Convierte la fecha y hora que extrajo el LLM en un instante de Madrid.
+    """Convierte la fecha y hora que extrajo el LLM en un instante de Madrid. None = sin momento concreto.
 
-    Si la hora es ambigua ("a las seis"), se elige la lectura de 12 h que cae dentro de la ventana de ese día
-    (06:00 no, 18:00 sí). Si ninguna de las dos cae, se queda la de la mañana, salvo que sea antes de las 8 (nadie
-    pide que le llamen de madrugada): entonces, la de la tarde.
+    - Día sin hora ("el lunes"): la apertura de la franja de ese día. Si el día es hoy ("hoy más tarde"), None.
+    - Hora sin día ("a las cinco"), o con el día de hoy: la primera lectura que todavía no pasó; si ya pasaron
+      todas, la de mañana.
+    - Si la hora es ambigua ("a las seis"), se prefiere la lectura de 12 h que cae dentro de la ventana de ese día
+      (06:00 no, 18:00 sí). Si ninguna de las dos cae, la de la mañana, salvo que sea antes de las 8 (nadie pide que
+      le llamen de madrugada): entonces, la de la tarde.
     """
-    if not datos.callback_fecha:
+    if not datos.callback_fecha and not datos.callback_hora:
         return None
+    hoy = tiempo.a_local(t, cfg).date()
     try:
-        fecha = datetime.fromisoformat(datos.callback_fecha).date()
-        if datos.callback_hora:
-            horas, minutos = (int(x) for x in datos.callback_hora.split(":")[:2])
-        else:
+        fecha = datetime.fromisoformat(datos.callback_fecha).date() if datos.callback_fecha else None
+        if not datos.callback_hora:
+            if fecha == hoy:
+                return None
             franja = cfg.ventana[fecha.weekday()]
             horas, minutos = (franja[0].hour, franja[0].minute) if franja else (10, 0)
-        candidato = datetime.combine(fecha, time(horas, minutos), tzinfo=cfg.zona)
-    except (ValueError, TypeError):
+            return datetime.combine(fecha, time(horas, minutos), tzinfo=cfg.zona)
+        horas, minutos = (int(x) for x in datos.callback_hora.split(":")[:2])
+        lecturas = [time(horas, minutos)]
+        if datos.callback_hora_ambigua and horas < 12:
+            lecturas.append(time(horas + 12, minutos))
+    except (ValueError, TypeError, AttributeError):
         return None
-    if datos.callback_hora_ambigua and horas < 12:
-        tarde = candidato + timedelta(hours=12)
-        if not tiempo.en_ventana(candidato, cfg) and (tiempo.en_ventana(tarde, cfg) or horas < 8):
-            candidato = tarde
-    return candidato
+
+    def por_preferencia(dia) -> list[datetime]:
+        candidatos = [datetime.combine(dia, lectura, tzinfo=cfg.zona) for lectura in lecturas]
+        if len(candidatos) == 2 and not tiempo.en_ventana(candidatos[0], cfg) and (tiempo.en_ventana(candidatos[1], cfg) or horas < 8):
+            candidatos.reverse()
+        return candidatos
+
+    if fecha is None or fecha == hoy:
+        # "Llámame a las cinco" dicho hoy: la lectura preferida que aún no pasó (a las 12:00, "a las seis" es 18:00).
+        futuras = [c for c in por_preferencia(hoy) if c > t]
+        if futuras:
+            return futuras[0]
+        fecha = hoy + timedelta(days=1)
+    return por_preferencia(fecha)[0]

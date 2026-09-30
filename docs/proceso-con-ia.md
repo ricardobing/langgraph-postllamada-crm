@@ -45,7 +45,7 @@ equivocó.
 ## Cómo verifiqué
 
 Ver el README. En resumen:
-- 123 tests con LLM falso: sin red, deterministas;
+- 132 tests con LLM falso: sin red, deterministas;
 - el lote completo como procesos reales;
 - evaluación con el modelo real, repetida (capa 6);
 - revisión del ejemplo resuelto campo a campo.

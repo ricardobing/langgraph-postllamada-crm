@@ -88,7 +88,7 @@ Plazos de tareas y recordatorios:
 ### Identificadores
 
 - `idempotency_key` de cada orden = `<idempotency_key del evento>:<operacion>[:distintivo]`.
-- `orden_id` = `ord_` + los primeros 8 caracteres del hash SHA-256 de esa clave. Es estable entre ejecuciones.
+- `orden_id` = `ord_` + los primeros 8 caracteres del hash SHA-1 de esa clave (el esquema que reproduce el ejemplo resuelto). Es estable entre ejecuciones.
 - `reminder_id` y demás identificadores, generados y persistidos.
 
 ## 3. Salida esperada del lote de ejemplo (oráculo)

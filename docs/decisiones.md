@@ -1,5 +1,18 @@
 # Decisiones de diseño
 
+## Qué hace cada pieza
+
+| Pieza | Qué hace |
+|---|---|
+| `postllamada/grafo.py` | El grafo. Cada nodo devuelve solo lo que cambia; las aristas condicionales eligen el camino |
+| `senalizacion.py` | 486, 603, 408/480, 5xx, buzón e IVR, **por reglas**. El modelo solo se llama si contestó una persona |
+| `llm.py` + `prompts/` | El modelo **solo interpreta**: etiqueta, motivo, confianza y datos, validados con pydantic. Reintentos y respaldo |
+| `ordenes.py` + `tiempo.py` | **El código decide**: órdenes, ventana de llamadas, plazos, días hábiles, intentos y reglas N1–N5 |
+| `estado.py` | SQLite. Una transacción por evento con hechos, órdenes (clave de idempotencia única), bajas, rechazo de WhatsApp y recordatorios con su `reminder_id` |
+| `jev.py` | *Opcional, apagado por defecto.* Envuelve al clasificador con Jev (modo rápido o segunda opinión). El grafo no sabe que existe |
+
+## Decisiones
+
 Cada decisión trae la alternativa descartada y el motivo. Las cuatro primeras las tomé antes de escribir código.
 
 | # | Decisión | Alternativa descartada | Por qué |
@@ -26,6 +39,7 @@ Cada decisión trae la alternativa descartada y el motivo. Las cuatro primeras l
   disponible»). No se envía nada por WhatsApp (N1).
 - **Quien contesta no es el lead y pide que no llamen más a ese número:** `persona_equivocada`, no `no_contactar`. La baja la pide el lead; `verificar_telefono` ya evita volver a llamar a ese número. Lo encontró el set difícil: el modelo lo marcaba como baja 4 de cada 5 veces hasta que lo aclaré en el prompt.
 - **Callback sin hora concreta** («llámame otro día»): separación mínima general (2 h), llevada a la ventana.
+- **Callback con hora pero sin día** («llámame a las cinco»): hoy, con la primera lectura de la hora que todavía no pasó (a las 12:00, «las seis» es 18:00); si ya pasaron todas, mañana. Lo mismo si el modelo pone la fecha de hoy con una hora ya pasada.
 - **Visita inminente** (menos de 2 h): la tarea `confirmar_visita_direccion` vence en el momento del evento.
 - **Lead dado de baja:** en llamadas posteriores solo `cerrar_llamada`. Cerrar la entrada de cola no contacta al lead.
 - **Descolgaron sin conversación** (200, humano, transcripción vacía): `otro` + revisión.

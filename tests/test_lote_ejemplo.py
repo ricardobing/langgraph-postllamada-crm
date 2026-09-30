@@ -1,6 +1,7 @@
 """Capa 3: integración. El lote de ejemplo completo, un "proceso" por evento, contra la salida esperada de
 docs/analisis.md §3. El LLM es falso: devuelve la etiqueta que un humano asignó leyendo cada transcripción."""
 import json
+import sqlite3
 
 from conftest import EVENTOS, RAIZ, cargar, errores_de_formato, llm
 
@@ -82,6 +83,13 @@ def test_cancelar_recordatorio_usa_los_ids_creados_en_otro_proceso(entorno):
     creados = {o["idempotency_key"] for o in e.ordenes_de("evt_08") if o["operacion"] == "programar_recordatorio"}
     cancelados = [o["cuerpo"]["reminder_id"] for o in e.ordenes_de("evt_14")]
     assert len(creados) == 2 and len(set(cancelados)) == 2
+    # Los cancelados son exactamente los que se persistieron al programarlos (el martes, en otro proceso).
+    con = sqlite3.connect(e.db)
+    try:
+        persistidos = dict(con.execute("SELECT reminder_id, estado FROM recordatorios WHERE contact_id = 'c_302'").fetchall())
+    finally:
+        con.close()
+    assert set(cancelados) == set(persistidos) and set(persistidos.values()) == {"cancelado"}
 
 
 def test_repetir_el_lote_entero_no_duplica_nada(entorno):
