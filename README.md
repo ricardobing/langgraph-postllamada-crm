@@ -34,8 +34,10 @@ python run.py eventos/01-call-ended-nuria.json      # con uv: uv run python run.
 - **Desarrollo:** medí todo vía OpenRouter con el mismo SDK (`OPENAI_BASE_URL`, `MODELO=openai/gpt-5.6-luna`). Sin
   `OPENAI_BASE_URL` el cliente va directo a `api.openai.com`; ese camino lo probé hasta la autenticación, no con una
   clasificación real. Si el modelo no responde, la llamada va a revisión humana y el proceso sigue.
-- **Extra opcional, apagado por defecto: Jev** (`JEV_ACTIVADO=1` + `OPENROUTER_API_KEY`). Medido: aporta velocidad,
-  no acierto, así que queda apagado. Ver [`docs/jev.md`](docs/jev.md).
+- **Extra opcional, apagado por defecto: Jev** (`JEV_ACTIVADO=1` + `OPENROUTER_API_KEY`). En modo rápido resuelve un
+  tercio de los eventos en 0,5 s en vez de ~3,5 s, con el mismo acierto y un 12–23 % menos de costo con
+  `gpt-5.6-luna` (neutro con `gpt-6-luna`, que es más barato). Con un modelo más caro, el ahorro se acercaría a ese
+  tercio (estimado, sin medir). No mejora el acierto, así que queda apagado. Ver [`docs/jev.md`](docs/jev.md).
 
 Qué hace cada pieza y las 15 decisiones de diseño con su alternativa descartada: [`docs/decisiones.md`](docs/decisiones.md).
 

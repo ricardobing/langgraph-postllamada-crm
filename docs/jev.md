@@ -72,12 +72,32 @@ cuándo llamar), que decide el modelo y no Jev: es un `callback` y necesita la h
 | Opción | Cuándo |
 |---|---|
 | **Sin Jev** (por defecto) | Lo que pide el enunciado. Una sola dependencia externa y una sola clave. Es lo que evalúan |
-| `rapido` | Cuando importa la latencia: un tercio de los eventos se resuelve en 0,5 s en vez de ~3,5 s, sin perder acierto. Ahorra costo con el modelo principal (−12 % a −23 % con `gpt-5.6-luna`) y queda neutro con uno barato (con `gpt-6-luna`, lo que cuesta Jev es lo que se ahorra). Suma ~0,5 s a los eventos que igual van al modelo |
+| `rapido` | Cuando importa la latencia o el modelo principal es caro: un tercio de los eventos se resuelve en 0,5 s en vez de ~3,5 s, sin perder acierto. Ahorra costo con el modelo principal (−12 % a −23 % con `gpt-5.6-luna`) y queda neutro con uno barato (con `gpt-6-luna`, lo que cuesta Jev es lo que se ahorra). Suma ~0,5 s a los eventos que igual van al modelo |
 | `segunda_opinion` | Como red de seguridad ante una caída del proveedor principal. En la práctica ya la cubre el modelo de respaldo, y los modelos nunca dudaron, así que **hoy no aporta**. La dejo porque no cuesta nada cuando no actúa |
 
-Resumen honesto: **Jev aporta velocidad, no acierto.** En este proceso, que corre después de la llamada, 3 segundos
-no le importan a nadie, así que apagado por defecto es la decisión correcta. Lo encendería si la clasificación se
-usara durante la llamada o con mucho volumen sobre un modelo más caro.
+Resumen honesto: **Jev aporta velocidad y, con un modelo caro, costo; no aporta acierto.** En este proceso, que corre
+después de la llamada, 3 segundos no le importan a nadie, así que apagado por defecto es la decisión correcta. Lo
+encendería si la clasificación se usara durante la llamada o con mucho volumen sobre un modelo más caro.
+
+## Y con un modelo más caro (estimado, sin medir)
+
+Jev cuesta lo mismo sea cual sea el modelo principal (unos USD 0,00004 por consulta, informado por OpenRouter) y se
+consulta en todos los eventos. Lo que ahorra es proporcional al precio del modelo que evita:
+
+> ahorro por evento ≈ fracción que resuelve Jev × costo por llamada del modelo − costo de Jev
+
+| Modelo principal | Costo por llamada | Ahorro con Jev rápido |
+|---|---|---|
+| `gpt-6-luna` | ~USD 0,00012 | ~0 % (medido) |
+| `gpt-5.6-luna` | ~USD 0,00027 | 12–23 % (medido) |
+| `gpt-6-sol` | ~USD 0,0036 | ~32 % (estimado) |
+| `gpt-6-astra` | ~USD 0,016 | ~33 % (estimado) |
+
+- **Costo por llamada:** los precios de `gpt-6-sol` y `gpt-6-astra` salen de escalar el de `gpt-5.6-luna` con una
+  clasificación real de cada uno sobre la misma conversación: ~14× y ~62×.
+- **Fracción que resuelve Jev:** un tercio, la medida en el set normal. En el set difícil fue más: 41 %.
+- **Velocidad:** esos modelos tardaron 7 y 10 s en esa clasificación, contra ~3,5 s. La ganancia de velocidad
+  también crece.
 
 ## Riesgos
 
