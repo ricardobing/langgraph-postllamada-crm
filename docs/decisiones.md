@@ -17,12 +17,14 @@ Cada decisión trae la alternativa descartada y el motivo. Las cuatro primeras l
 | 11 | **Plazos en horas = tiempo real (UTC); plazos en días = calendario de Madrid** | Sumar `timedelta` a fechas con zona | En Python eso suma «hora de reloj», y en el cambio de hora (25/10) desplaza una hora. Hay test |
 | 12 | **El estado vive en `salida/estado.sqlite`** | Una carpeta aparte | Si se borra `salida/` para empezar de cero, como hace la evaluación, se borra también la memoria. No quedan restos del lote anterior |
 | 13 | **Sin modelo no se rompe:** si no hay clave o el LLM falla (3 reintentos + modelo de respaldo), la llamada con conversación es `otro` + `revisar_llamada`. Con cita, `visita_reservada` | Salir con error | R8. Un humano revisa lo que la máquina no pudo leer |
-| 14 | **Jev como segunda opinión opcional**, desactivada por defecto | Jev como clasificador principal | El enunciado pide un modelo de OpenAI y «sin red salvo el modelo». Jev añade velocidad y una red de seguridad, pero nunca puede ser imprescindible |
+| 14 | **Jev como añadido opcional, apagado por defecto**, con dos modos: `segunda_opinion` (si el modelo duda o se cae) y `rapido` (Jev primero; si está muy seguro de una etiqueta que no necesita datos, se evita el modelo). Todo en un envoltorio del clasificador: el grafo no sabe que existe | Jev como clasificador principal | El enunciado pide un modelo de OpenAI y «sin red salvo el modelo». Jev tiene que poder apagarse sin que cambie nada, y si falla, el sistema sigue como si no existiera. Medido en [`jev.md`](jev.md) |
+| 15 | **Modelo `gpt-5.6-luna`, respaldo `gpt-6-luna`** | `gpt-6-luna` como principal (cuesta menos de la mitad) | Empatan en casi todo, pero en el caso más ambiguo del set difícil `gpt-5.6-luna` acierta 86 % contra 62 % (50 y 45 repeticiones). La diferencia de costo son USD 0,00015 por llamada. El respaldo es otro modelo de OpenAI para que funcione con la misma clave. Ver [`evaluaciones/comparacion-modelos.md`](evaluaciones/comparacion-modelos.md) |
 
 ## Casos que el enunciado no fija y cómo los resolví
 
 - **WhatsApp rechazado y hace falta el canal de respaldo:** tarea `revisar_llamada` («sin canal de respaldo
   disponible»). No se envía nada por WhatsApp (N1).
+- **Quien contesta no es el lead y pide que no llamen más a ese número:** `persona_equivocada`, no `no_contactar`. La baja la pide el lead; `verificar_telefono` ya evita volver a llamar a ese número. Lo encontró el set difícil: el modelo lo marcaba como baja 4 de cada 5 veces hasta que lo aclaré en el prompt.
 - **Callback sin hora concreta** («llámame otro día»): separación mínima general (2 h), llevada a la ventana.
 - **Visita inminente** (menos de 2 h): la tarea `confirmar_visita_direccion` vence en el momento del evento.
 - **Lead dado de baja:** en llamadas posteriores solo `cerrar_llamada`. Cerrar la entrada de cola no contacta al lead.

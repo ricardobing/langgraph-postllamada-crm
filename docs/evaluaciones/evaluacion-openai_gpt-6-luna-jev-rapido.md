@@ -1,6 +1,6 @@
 # Evaluación con el modelo real: `openai/gpt-6-luna`
 
-Modelo `openai/gpt-6-luna` · 2026-09-30 13:04 · 5 repeticiones por caso · acierto 104/105 (99.0 %) · latencia mediana por evento 3.1 s (media 4.4 s) · gasto informado USD 0.0120
+Modelo `openai/gpt-6-luna` + Jev `rapido` · 2026-09-30 13:06 · 5 repeticiones por caso · acierto 105/105 (100.0 %) · latencia mediana por evento 3.3 s (media 4.4 s) · gasto informado USD 0.0119 (Jev USD 0.0038) · el modelo se llamó en 70/105 eventos · Jev consultado 105 veces · latencia mediana resuelto solo por Jev 0.4 s, con el modelo 3.7 s
 
 | Caso | Esperado | Aciertos | Resultados |
 |---|---|---|---|
@@ -12,7 +12,7 @@ Modelo `openai/gpt-6-luna` · 2026-09-30 13:04 · 5 repeticiones por caso · aci
 | 09-call-ended-javier.json | `callback` | 5/5 | {'callback': 5} |
 | 11-call-ended-carla.json | `visita_sin_confirmar` | 5/5 | {'visita_sin_confirmar': 5} |
 | 13-call-ended-ivan.json | `documentacion_pendiente` | 5/5 | {'documentacion_pendiente': 5} |
-| c01-callback-noche.json | `callback` | 4/5 | {'callback': 5} · hora de callback mal: 1 |
+| c01-callback-noche.json | `callback` | 5/5 | {'callback': 5} |
 | c02-callback-lunes.json | `callback` | 5/5 | {'callback': 5} |
 | c03-ahora-no-puedo.json | `otro` | 5/5 | {'otro': 5} |
 | c04-descartado.json | `descartado` | 5/5 | {'descartado': 5} |
