@@ -1,0 +1,15 @@
+{
+  "c01-callback-noche": "callback",
+  "c02-callback-lunes": "callback",
+  "c03-ahora-no-puedo": "otro",
+  "c04-descartado": "descartado",
+  "c05-descartado-cuelga": "descartado",
+  "c06-baja-ya-encontre": "no_contactar",
+  "c07-baja-y-sigue": "no_contactar",
+  "c08-equivocado-padre": "persona_equivocada",
+  "c09-doc-email": "documentacion_pendiente",
+  "c10-doc-whatsapp": "documentacion_enviada",
+  "c11-visita-verbal": "visita_sin_confirmar",
+  "c12-cortada": "cortada",
+  "c13-callback-ambiguo": "callback"
+}
