@@ -151,9 +151,12 @@ class ClasificadorOpenAI:
 
     @classmethod
     def desde_entorno(cls) -> "ClasificadorOpenAI":
+        # Respaldo por defecto solo contra OpenAI directo: si el modelo elegido no estuviera habilitado en la cuenta,
+        # las conversaciones no acaban todas en revisión humana.
+        respaldo_por_defecto = None if os.environ.get("OPENAI_BASE_URL") else "gpt-4.1-mini"
         return cls(
             modelo=os.environ.get("MODELO") or "gpt-6-luna",
-            modelo_respaldo=os.environ.get("MODELO_RESPALDO") or None,
+            modelo_respaldo=os.environ.get("MODELO_RESPALDO") or respaldo_por_defecto,
         )
 
     def clasificar(self, evento: dict, zona) -> Clasificacion:
