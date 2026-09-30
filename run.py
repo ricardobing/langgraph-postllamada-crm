@@ -39,10 +39,16 @@ def crear_clasificador():
     from postllamada.llm import ClasificadorOpenAI
 
     clasificador = ClasificadorOpenAI.desde_entorno()
-    if os.environ.get("JEV_ACTIVADO") == "1" and os.environ.get("OPENROUTER_API_KEY"):
-        from postllamada.jev import ConSegundaOpinionJev
+    if os.environ.get("JEV_ACTIVADO") == "1":  # añadido opcional, apagado por defecto (ver postllamada/jev.py)
+        from postllamada.jev import MODOS, ClasificadorConJev
 
-        clasificador = ConSegundaOpinionJev(clasificador)
+        modo = os.environ.get("JEV_MODO") or "segunda_opinion"
+        if not os.environ.get("OPENROUTER_API_KEY"):
+            print("aviso: JEV_ACTIVADO=1 sin OPENROUTER_API_KEY; sigo solo con el modelo de OpenAI", file=sys.stderr)
+        elif modo not in MODOS:
+            print(f"aviso: JEV_MODO={modo} no existe ({', '.join(MODOS)}); sigo solo con el modelo de OpenAI", file=sys.stderr)
+        else:
+            clasificador = ClasificadorConJev(clasificador, modo=modo)
     return clasificador
 
 

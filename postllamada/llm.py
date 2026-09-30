@@ -128,6 +128,10 @@ def a_clasificacion(salida: SalidaLLM, fuente: str) -> Clasificacion:
     )
 
 
+MODELO_POR_DEFECTO = "gpt-5.6-luna"
+RESPALDO_POR_DEFECTO = "gpt-6-luna"
+
+
 class ClasificadorOpenAI:
     """Cliente del SDK oficial de OpenAI.
 
@@ -135,7 +139,7 @@ class ClasificadorOpenAI:
     a otro servidor compatible durante el desarrollo sin tocar código.
     """
 
-    def __init__(self, modelo: str, modelo_respaldo: str | None = None, intentos: int = 3, timeout: float = 30.0):
+    def __init__(self, modelo: str, modelos_respaldo: list[str] | None = None, intentos: int = 3, timeout: float = 30.0):
         from openai import OpenAI  # import tardío: los tests no necesitan el SDK configurado
 
         self.cliente = OpenAI(
@@ -144,19 +148,26 @@ class ClasificadorOpenAI:
             timeout=timeout,
             max_retries=0,  # los reintentos los controlamos aquí, junto con la validación del JSON
         )
-        self.modelos = [m for m in (modelo, modelo_respaldo) if m]
+        self.modelos = [modelo, *[m for m in (modelos_respaldo or []) if m and m != modelo]]
         self.intentos = intentos
         self.prompt = RUTA_PROMPT.read_text(encoding="utf-8")
         self.costo_usd = 0.0  # si el proveedor lo informa (OpenRouter), para medir en la evaluación
 
     @classmethod
     def desde_entorno(cls) -> "ClasificadorOpenAI":
-        # Respaldo por defecto solo contra OpenAI directo: si el modelo elegido no estuviera habilitado en la cuenta,
-        # las conversaciones no acaban todas en revisión humana.
-        respaldo_por_defecto = None if os.environ.get("OPENAI_BASE_URL") else "gpt-4.1-mini"
+        """MODELO y MODELO_RESPALDO (lista separada por comas; vacío = sin respaldo). Si no se indica respaldo, se
+        usa otro modelo de OpenAI: si el principal no está habilitado en la cuenta, las conversaciones no acaban
+        todas en revisión humana. Contra OpenRouter (desarrollo) los mismos modelos llevan el prefijo "openai/"."""
+        base_url = os.environ.get("OPENAI_BASE_URL", "")
+        respaldo = os.environ.get("MODELO_RESPALDO")
+        if respaldo is None:
+            if not base_url:
+                respaldo = RESPALDO_POR_DEFECTO
+            elif "openrouter.ai" in base_url:
+                respaldo = f"openai/{RESPALDO_POR_DEFECTO}"
         return cls(
-            modelo=os.environ.get("MODELO") or "gpt-6-luna",
-            modelo_respaldo=os.environ.get("MODELO_RESPALDO") or respaldo_por_defecto,
+            modelo=os.environ.get("MODELO") or MODELO_POR_DEFECTO,
+            modelos_respaldo=[m.strip() for m in (respaldo or "").split(",")],
         )
 
     def clasificar(self, evento: dict, zona) -> Clasificacion:
@@ -168,8 +179,10 @@ class ClasificadorOpenAI:
                     return a_clasificacion(salida, "llm" if i == 0 else "respaldo_llm")
                 except (ValidationError, json.JSONDecodeError, KeyError, IndexError, TypeError) as e:
                     errores.append(f"{modelo}: respuesta inválida ({type(e).__name__})")
-                except Exception as e:  # red, cuota, timeout…: se reintenta igual
+                except Exception as e:  # red, cuota, timeout…
                     errores.append(f"{modelo}: {type(e).__name__}: {str(e)[:120]}")
+                    if getattr(e, "status_code", None) in (400, 401, 403, 404):
+                        break  # modelo inexistente, sin permiso o petición inválida: reintentar no lo arregla → respaldo
                 time.sleep(min(2 ** intento, 4) * 0.5)
         raise ErrorClasificacion("; ".join(errores[-3:]))
 
