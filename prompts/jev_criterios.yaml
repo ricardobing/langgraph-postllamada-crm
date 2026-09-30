@@ -1,0 +1,15 @@
+# Criterios de la pregunta de decisión que se envía a Jev (typesafe/jev-1.13), el modelo de decisiones tipadas de
+# OpenRouter. Son las mismas definiciones que prompts/clasificar_llamada.md, en el formato "choice" de Jev.
+instrucciones: >-
+  Clasifica cómo fue esta llamada de un agente de voz inmobiliario con un lead, según la transcripción.
+  Si el lead pide que no le contacten, eso manda sobre cualquier otra cosa.
+criterios:
+  no_contactar: El lead pide explícitamente que no le vuelvan a llamar o contactar, que le den de baja o que borren sus datos, aunque la conversación siga después.
+  persona_equivocada: Quien contesta no es el lead y no se sabe cuándo localizarlo (número equivocado).
+  descartado: El lead ya compró, ya alquiló o ya no busca vivienda, sin pedir que no le llamen.
+  callback: El lead pide expresamente que se le llame en otro momento.
+  documentacion_enviada: El agente envió durante la llamada la documentación y el lead aceptó recibirla por WhatsApp.
+  documentacion_pendiente: El lead pide documentación pero rechaza recibirla por WhatsApp.
+  visita_sin_confirmar: Se acordó una visita de palabra y la llamada cayó antes de que el agente la creara.
+  cortada: La llamada se corta a mitad de la cualificación, sin despedida, sin visita acordada.
+  otro: Ninguna de las anteriores encaja con claridad (por ejemplo, «ahora no puedo» sin pedir otra llamada).
