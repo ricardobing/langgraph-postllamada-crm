@@ -1,0 +1,11 @@
+# secretos
+.env
+# entorno
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+# salida y estado de las ejecuciones locales
+salida/
+eval/resultados/
